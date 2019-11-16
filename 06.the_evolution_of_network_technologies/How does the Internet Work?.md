@@ -88,6 +88,65 @@ Once the packet arrives at the destination computer, it traverses back up the la
 
 ![Screen Shot 2019-11-13 at 2.58.12 PM](/Users/nathanworden/Documents/School/Launch_School/LS170_Networking_Foundations/06.the_evolution_of_network_technologies/Screen Shot 2019-11-13 at 2.58.12 PM.png)
 
-### Mix and Match
+####Mix and Match
 
-Depending on your priorities, or the needs of your communication, you may choose to use 
+Earlier we mentioned mixing and matching protocols. Why would you do this? Becaues of trade-offs between what different protocols prioitize. A good example would be the difference between the Transmission Control Protocol (TCP) and User Datagram Protocol (UDP) in the Transport Layer. TCP provides reliablity through message acknowledgement, retransmission of messages, in-order delivery of messages, and congestion avoidance on the network. UDP on the other hand does none of these things. This makes TCP more reliable, but slower. A brief example of this would be TCP's three-way handshake to establish a connection:
+
+1. The Sender sends a `SYN` (syncronization) Segement.
+
+2. The Receiver receives the `SYN` Segment and responds with a `SYN ACK` (Acknowledgement) Segment
+3. The original Sender receives the `SYN ACK` Segment, and responds with an `ACK` Segment
+4. The Receiver receives the `ACK` Segment, connection is now established, and can now send application data.
+
+What this means is there is a lot of latency added to establish a TCP connection. UDP does not do this and just starts starts sending data without establishing a connection. This makes UDP much less reliable but also much faster. The tradeoff is that UDP is more flexible- you can choose to implement some of the reliablity services at the application layer if you want to if you are using UDP. With TCP they come out of the box but slow things down.
+
+Like we said earlier however, an IP packet will still be happy to transport either a TCP segment or a UDP datagram in it's datapayload either way. Whatever protocol you choose to use at the Transport Layer won't affect the Internet layer's services to it.
+
+#### Security
+
+If we want to securly send HTTP messages, we will be using a protocol called Transport Layer Securty (TLS) which works in conjunction with the Transmission Control Protocol (TCP). TCP goes first and establishes it's connection with the handshake sequence we descibed above. Then TLS does it's own handshake which looks like this:
+
+1. The client sends a `ClientHello` TLS message which includes the version of TLS it can support and a list of Cipher Suites (sets of cryptographic algorithms used for performing encryption).
+2. The server responds with a `ServerHello`message which picks the protocol version and Cipher Suite and sends a certificate which contains a public encryption key.
+3. The client receives this and then uses Asymetric Key Encryption to enable both the client and the server to generate the same symmetric key so that they can securely communicate.
+
+This is a farly complex process and can add upt to two round-trips of latency delay to establish the connection between server and client- and this is on top of the latency from the TCP handshake that already occured. Once this is all complete, we're finally ready to sent HTTP messages!
+
+#### HTTP
+
+HTTP is the set of rules which provide uniformity to the way resources on the web are transferred between applications. HTTP is set up in a request and reponse cycle.
+
+An HTTP request would look like this:
+
+```ruby
+GET /home HTTP/1.1
+Host: google.com
+[Other headers]
+
+```
+
+There will be a request method which tells the server what we wat to do with the resource (in this case, we want to receive it using the `GET` command). The `/home` is the path which shows what local resource is being requested. The `HTTP/1.1` is the verision of HTTP that we want to use.
+
+An HTTP response from the server would look like this:
+
+```ruby
+200 OK
+```
+
+The most common response status code is 200 which means the request was handled successfuly. But you might also run into various other status codes such as `302 Found`,`404 Not Found`, and `500 Internal Server Error`. The status line will come with optional headers and the body, which contains the raw response data of the page which will look like this:
+
+ ```ruby
+<!DOCTYPE html>
+<html itemscope="" itemtype="http://schema.org/WebPage" lang="en">
+
+<head>
+  <!-- Rest of the page -->
+ ```
+
+The HTTP response will likely contain references to other resources (such as videos, images, fonts, etc.) and our browser will automatically send out new HTTP requests to the relevant servers to retrieve them. They will need to do new TCP / TLS handshakes if the resouece is hosted on a different domain than the current one.
+
+Once our browser has all of the resources it is able to parse everything and render the web page!
+
+#### The Internet is Complex
+
+There is a lot more detail that you could dive into in every section of this overview. But I hoped this helped your form a preliminary mental model of how the internet works!
