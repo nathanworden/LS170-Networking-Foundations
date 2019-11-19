@@ -27,7 +27,28 @@ Although not a perfect model if we are thinking about the specifics of implement
 
 - How Does the Internet Work?
 
-  
+  A networks is at least two computers connected in such a way that they can exchange data. More commonly a Local Area Network is a group of computers all connected through a device such as a switch or a hub. These LANs are connected via routers to larger networks. And these larger networks are connected to still larger networks. The internet is a vast network of networks.
+
+- What happens when you input an address into your browser?
+
+  1. User enters a URL in browser.
+  2. Browser connects to DNS.
+  3. DNS returns IP address to browser.
+  4. Browser starts a connection to the server at the IP address and port. To start the connection, an empty TCP segment is sent with a `SYN` flag in its’ header. This TCP segment is encapsulated inside of an IP packet inside of an Ethernet frame.
+  5. The Ethernet frame moves along to each hop at the network. At each hop, the frame is processed by removing the frame layer, and the router looks at the destination IP address inside of the packet and determine the packet’s next stop. The packet is re-encapsulated into a frame and goes to it’s next destination.
+  6. The frame gets to the server. The Ethernet frame and the IP packet layers are removed, and the server retrieves the `SYN` inside of the TCP segment to initialize a connection.
+  7. Client and server go through the Three Way Handshake. The server sends a TCP segment containing a `SYN ACK` in its’ header. The segment is encapsulated inside an IP packet, which is itself encapsulated into an Ethernet frame that travels through the network to the client. The client sends a `ACK` message in the same manner.
+  8. Client and server go through the TLS Handshake. Client sends a `ClientHello` message that contains information about the TLS protocol, including version number and a list of cipher suites (cryptographic algorithms that establish and maintain the connection) the client is able to use. Server sends a `ServerHello` message, setting the TLS protocol version and cipher suite. Server sends a certificate that contains its public key, and a `ServerHelloDonemarker` that tells the client it is done with this step of the handshake. Client initiates a key exchange process that enables client and server to obtain a copy of the symmetric encryption key. Client sends a `ChangeCipherSpec` flag to tell the server that encrypted communications should now start using the symmetric keys.
+  9. The HTTP `GET` request is encapsulated into TCP segments which get encapsulated into IP packets which form the data payload for Ethernet frames.
+  10. Ethernet frames are sent on the physical network to their destination.
+  11. After each frame arrives at the destination, lower layer PDUs are dropped and TCP checks each segment for errors and rearranges them in order, retransmitting corrupt or absent data.
+  12. Server receives the HTTP request.
+  13. Server sends HTTP response.
+  14. The HTTP response is encapsulated into TCP segments which are encapsulated into IP packets which are encapsulated into Ethernet frames.
+  15. Ethernet frames are sent on the physical network to the client. Each frame is dropped and TCP verifies segments.
+  16. The FIN flag is sent inside an empty TCP segment from the server to the client to close the connection.
+  17. The lower level PDUs are dropped and the browser receives the HTTP response.
+  18. The browser displays the body of the HTTP response.
 
 ####Understand the characteristics of the physical network, such as latency and bandwidth
 
@@ -42,9 +63,13 @@ Although not a perfect model if we are thinking about the specifics of implement
   - Processing delay: The amount of time data need to be processed when jumping from one link to another.
   - Queuing delay: If there is more data than a device can handle, then the data will queue, or buffer.
 
+  Latency is a physical limitation of the network and thus affects the speed at which communication can happen back and forth on the network. 
+
 - What is bandwidth?
 
   Bandwidth is the amount of data that can be sent at once. Bandwidth is a measure of capacity. Bandwidth is not constant across the network. The capacity at the core of the network is higher than the edges. The bandwidth that a connection receives is the lowest amount at a particular point in the overall connection. A bandwidth bottleneck is a point at which the bandwidth changes from realitevly high to relatively low.
+
+  Bandwidth is a physical limitation of the network and thus affects the amount of data that can be sent at once in network communcation.
 
 - What is Last-mile latency?
 
@@ -60,7 +85,7 @@ Although not a perfect model if we are thinking about the specifics of implement
 
   **Operates as an interface between the physical network and the more logical layers above.** 
 
-  The Ethernet protocol is the most commonly used protocol at this layer. The Ethernet protocol provides communication between devices on the same local network. Ethernet uses MAC addressing to identify devices connected to the local network. Uses a PDU called a Frame.
+  The Ethernet protocol is commonly used protocol at this layer. The Ethernet protocol provides communication between devices on the same local network. Ethernet uses MAC addressing to identify devices connected to the local network. Uses a PDU called a Frame.
 
   Two of the most important aspects of Ethernet are framing and addressing.
 
@@ -71,6 +96,16 @@ Although not a perfect model if we are thinking about the specifics of implement
   Destination MAC address is the address of the device for which the data is intended.
 
   https://launchschool.com/lessons/4af196b9/assignments/81df3782
+
+- How do MAC Addresses work? What are the characteristics of a MAC address?
+
+
+
+
+
+
+
+
 
 - How does the Network / Internet Layer operate?
 
@@ -96,6 +131,11 @@ Although not a perfect model if we are thinking about the specifics of implement
 
   An IP address is used to identify host machines. It is used to create a communication channel between hosts, sending a packet from one host to another. IP addresses enable communication between two networked devices anywere in the world. However, if we want to create networked applications, we need more than just communication between devices. We need to be able to transport data between specific applications on the client and server.
 
+  **Talk about what the numbers mean on IPv4 and IPv6**
+
+  Logical in nature, not like mac addresses. Can be assigned as required. 
+  
+
 - What is a Port Number?
 
   A port is an identifer for a specific process running on a host. This identifier is an integer in the range 0-65535. Sections of the range are reserved for specific purposes:
@@ -109,6 +149,10 @@ Although not a perfect model if we are thinking about the specifics of implement
 - The combination of IP address adnd port number infomration can be thought of as defining a communication end-point. This communication end point is generally referred to as a *socket*. It would look like this: `216.3.128.12:8080`. You can think of the postal service as an analogy. The IP address is like the streed address of the apartment building, the individual apartment number is like a port number. The postal service can be thought of as the Internet Protocol, and the building concierge as the Transport layer protocol (TCP or UDP).
 
   https://launchschool.com/lessons/2a6c7439/assignments/41113e98
+
+- Why are multiplexing and demultiplexing important?
+
+  They allow a client or server to run multiple different processes on a server at once.
 
 ####Have an understanding of how DNS works
 
@@ -135,6 +179,8 @@ A client such as a web browser is responsible for issuing HTTP requests and proc
 Servers are just machines or devices capable of handling inbound requests, processing them, and their job is to issue a response back. 
 
 The client makes a request, and the server issues a response to that request. 
+
+A client server model is a type of network articheture. A client, the computer, connects to another computer, a server, and they exchange data back and forth.
 
 https://launchschool.com/books/http/read/background#resources
 
@@ -222,8 +268,8 @@ Looks like this:
 | Client Start State | Client Action                                                | Client End State | Server Start State | Server Action                                                | Server End State |
 | ------------------ | ------------------------------------------------------------ | ---------------- | ------------------ | ------------------------------------------------------------ | ---------------- |
 | `CLOSED`           | Sends a `SYN` Segment                                        | `SYN-SENT`       | `LISTEN`           | Waits for a connection request                               | -                |
-| `SYN-SENT`         | Waits to receive an ACK to the SYN it sent, as well as the server's `SYN` | `SYN-SEN`        | `LISTEN`           | Sends a SYN ACK Segment which serves as both it's SYN and an ACK for the client's SYN | `SYN-RECEIVED`   |
-| `SYN-Sent`         | Receives the SYN ACK Segment sent by the server, and sends an ACK in response. The client is now finished with the connection establishment process | `ESTABLISHED`    | `SYN-RECEIVED`     | Waits for an ACK for the SYN it just sent                    | `                |
+| `SYN-SENT`         | Waits to receive an `ACK` to the `SYN` it sent, as well as the server's `SYN` | `SYN-SEN`        | `LISTEN`           | Sends a `SYN ACK` Segment which serves as both it's `SYN` and an `ACK` for the client's `SYN` | `SYN-RECEIVED`   |
+| `SYN-Sent`         | Receives the `SYN ACK` Segment sent by the server, and sends an `ACK` in response. The client is now finished with the connection establishment process | `ESTABLISHED`    | `SYN-RECEIVED`     | Waits for an `ACK` for the `SYN` it just sent                | `                |
 | `ESTABLISHED`      | Ready for data transfer. Can start sending application data. | `ESTABLISHED`    | `SYN-RECEIVED`     | Receives the ACK sent in response to its SYN. The server is now finished with the connection establishment process. | `ESTABLISHED`    |
 |                    |                                                              |                  |                    |                                                              |                  |
 
@@ -379,9 +425,37 @@ So what characters can be used safely within a URL? Only alphanumeric and specia
 
 ####Be able to explain what HTTP requests and responses are, and identify the components of each
 
+- What are HTTP requests?
 
+
+
+- What are the components of an HTTP request?
+  - The method (required)
+  - The path (required)
+  - the Host (required)
+  - parameters (optional)
+  - headers (optional)
+  - message body (optional)
 
 ####Be able to describe the HTTP request/response cycle
+
+- Please describe the HTTP request/response cycle
+
+Let's say you have a webserver and a browser. If you type in a URL to the browser, the browser will try and retreive that page for you. The browser creates an HTTP request. There are **two required pieces of information, the method** (such as GET), **and the path** (such as /tasks). You can also send optional fields such as 'Parameters', 'headers', or 'body'. The domain name is used to determine what server to send the request to. It is not used in the actual request itself. 
+
+After the server sees the request, it will perform some sort of work. What it does will vary based on what the server does, such as if there is data in the database, if there are files in the file server. A common workflow would look like this:
+
+	 - A request would come in
+	 - verify the user session
+	 - load tasks from the data base
+	 - render some HTML
+	 - Send response back to client.
+
+In the response, there will be a status (200 OK), Headers (a collection of medta data about the response, such as content type, meaning, how the browser it can interprest the response), and Body (the bulk of the data that is being sent. If it is a web page, the body will contain all the HTML code that the browser will display. If it was something else, say an audio file, then the body would be that data.)
+
+When the browser receives the response, it looks at the content-type header and then it will act accordingly, for example display the webpage to the viewer.  
+
+https://launchschool.com/lessons/cc97deb5/assignments/83ae67aa
 
 ####Be able to explain what status codes are, and provide examples of different status code types
 
