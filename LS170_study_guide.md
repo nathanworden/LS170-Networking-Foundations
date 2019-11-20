@@ -99,13 +99,15 @@ Although not a perfect model if we are thinking about the specifics of implement
 
 - How do MAC Addresses work? What are the characteristics of a MAC address?
 
+Every network-enabled device is assigned a unique MAC Address when it is manufacutred. It is linked to the specific physical device, so it is often referred to as the *physical address* or *burned-in address*. MAC Addresses are a swquence of six two digit hexadecimal numbers, e.g. `00:20:76:7d:87:0a`. Ranges of addresses are assigned to different network hardware manufacturers.
 
+Hubs send messages to all connected devices. Each receving device would check its MAC Address agains the Destination MAC address in the frame to see if it was the intended recipient. If it wasn't it would just ignore the frame. A switch will look at the destination address in the frame and direct the frame only to the device for which it is intended. A switch does this by keeping a record of the MAC addresses of the devices connected to it in a MAC address table. The table associated each address with the Ethernet port to which the device is connected on the switch.
 
+MAC addresses are physcial, not logical. They are tied to a specific physical device.
 
+MAC addresses are flat, not hierarchical. The entire address is a sequence of values and can't be broken down into sub-divisions.
 
-
-
-
+MAC Addressing works for local networks, but doesn't scale well past that. You wouuld need to store impossibly large lookup tables to keep track of which MAC Addresses were part of which local networks.
 
 - How does the Network / Internet Layer operate?
 
@@ -135,7 +137,6 @@ Although not a perfect model if we are thinking about the specifics of implement
 
   Logical in nature, not like mac addresses. Can be assigned as required. 
   
-
 - What is a Port Number?
 
   A port is an identifer for a specific process running on a host. This identifier is an integer in the range 0-65535. Sections of the range are reserved for specific purposes:
@@ -427,7 +428,11 @@ So what characters can be used safely within a URL? Only alphanumeric and specia
 
 - What are HTTP requests?
 
+A HTTP request and response are strings that are organized in a standared format  that another machine understands.
 
+https://launchschool.com/books/http/read/background#resources
+
+An *HTTP Request* consists of a *request line*, *headers*, and an optional *body*.
 
 - What are the components of an HTTP request?
   - The method (required)
@@ -459,12 +464,124 @@ https://launchschool.com/lessons/cc97deb5/assignments/83ae67aa
 
 ####Be able to explain what status codes are, and provide examples of different status code types
 
+- What is a status code?
+
+A status code is a three-digit number that the server sends back after receiving a request signifying the status of the request. The status text displayed next to the status code provides the description of the code. 
+
+- Please provide examples of different status code types
+
+| Status Code | Status Text           | Meaning                                                      |
+| ----------- | --------------------- | ------------------------------------------------------------ |
+| 200         | OK                    | The request was handled successfully                         |
+| 302         | Found                 | The requested resource has changed temporarily. Usually results in a redirect to another URL. |
+| 404         | Not Found             | The requested resource cannot be found.                      |
+| 500         | Internal Server Error | The server encontered a generic error.                       |
+
+More detail:
+
+302 Found - Commonly, when a resource is moved, a requestr is re-routed from the original URL to the new URL where the resource now resides. This is generally called a `redirect`. A status code of 302 tells your browser that a resource has been moved and it automatically follows the new re-routed URL in the `Location` response header.
+
+404 Not Found - The requested resrouce cannot be found. A resource can be anything; video viles, CSS stylesheets, JavaScript files, images, etc. 
+
+500 Internal Server Error - Means "There's something wrong on the server side." This is a generaic error status code and can mean a lot of different things. It could be a mis-configured server setting, a misplaced comma in the application code, or anything in between. It's a server issue. Someone with access to the server will have to debug and fix the problem.
+
 ####Understand what is meant by 'state' in the context of the web, and be able to explain some techniques that are used to simulate state
 
+- What does 'state' mean in the context of the web?
+
+Each Request/Response cycle is independent of Request and Responses that came before or those that come after.
+
+https://launchschool.com/lessons/cc97deb5/assignments/9f4e349a
+
+It means that the server does not need to hang on to information (e.g. state) between requests. As a result, when a request breaks en-route to the server, no part o the system has to do any cleanup.
+
+And it means that, since the web is built on HTTP and HTTP is stateless, it makes the web resilient, distributed, and hard to control. It's also what makes it so difficult to secure and build on top of.
+
+- Please explain some techniques that are used to simulate state
+
+Statefulness can be simulated through techniquest which use session IDs, cookies, and AJAX (Asynchronous JavaScript calls).
+
+  - Session IDs: The server sends a form of unique token, or session identifier to the client. Whenver a client makes a request to that server, the client appends this token as part of the request, allowing the server to identify clients.
+
+    Passing a session id back and forth between the client and server creates a sense of persistent connection between requests. 
+
+    Session IDs have consequences however. You have to inspect every request to see if it contains a session identifer. If it does, the server must check to ensure that this particular session id is still valid. The server will have to maintain some rules about how to handle session expiration and also decide how to store its session data. Also, the server needs to retrieve the session data based on the session id. Finally, the server needs to recreate the application state (e.g. the HTML for a web request) from the session data and send it back to the client as the response.
+
+    The server has to work hard to simulate statefulness. Every request still gets its own response, even if most of that response is identical to the previous response. 
+
+- Cookies: A cookie is a piece of data that's sent from the server and stored in the client during a request/response cycle. Cookies are small files stored in the browser and contain the session information. By default, most browsers have cookies enabled. When you access any website for the first time, the server sends session information and sets it in your browser cookie on your local computer. Note that the actual session data is stored on the server. The client side cookie is compared with the server-side session data on each request to identify the current session. This way, when you visit the same website agan, your session will be recognized because of the stored cookie with its assocaited information.
+
+- AJAX: Asynchronous JavaScript and XML allows browsers to issue requests and process responses without a full page refresh. The response is processed by a callback function, which is usually some client-side JavaScript code. You can thnk of a `callback` as a piece of logic you pass on to some function to be executed after a certain event has happened.
+
+https://launchschool.com/lessons/cc97deb5/assignments/9f4e349a
+
 ####Explain the difference between `GET` and `POST`, and know when to choose each
+
+- What is the difference between `GET` and `POST`?
+
+`GET` requests should only retrieve content from the server. They can generally be thought of as "read only" operations. One expection to this is a webpage that tracks how many times it is viewed. `GET` still works because the main content of the page didn't change. 
+
+https://launchschool.com/lessons/cc97deb5/assignments/83ae67aa
+
+`GET`requests are used to regtrieve a resource- most links are `GET`s.
+
+The response from a `GET` request can be anything, but if it's HTML and that HTML references other resources, your browser will automatically request those referenced resources. A pure HTTP tool will not.
+
+`POST` requests invovle changing values taht are stored on the server. Most HTML forms that submit their values to the server will use `POST`. Search forms are a noticeable exception to this rule: they often use `GET` since they are not changing any data on the server, only viewing it.
+
+`POST` is used when you want to initiate some action on the server, or send data to a server. Typically from within a browser, you use `POST` when submitting a form. `POST` requests allow us to send much alrger and sensitie data to the server, such as images or videos. Using a `POST` request to send a username and password to the server for authentication would be a good use case because `POST` requests help sidestep the query string size limitation that you have with `GET` requests. With `POST` requests, we can send significantly larger forms of information to the server.
+
+https://launchschool.com/books/http/read/making_requests#get
 
 ## Security
 
 ####Have an understanding of various security risks that can affect HTTP, and be able to outline measures that can be used to mitigate against these risks
 
+- What are the security risks that can affect HTTP?
+  - Somone stealing your browser's session id- they can log in as you.
+
+When the client and server send requests and responses to each other, these are being sent in the form of strings. A malicious hacker could attach to the same network and use packet sniffing to read the messages being sent back and forth. Requests can contain the session id, which uniquely identifies the client to the server, so if someone else copied the session id, they could craft a request to the server and pose as your client, and therefore automatically be logged in without even having access to your username or password.
+
+HTTPS is an answer to this. In HTTPS every request/repsonse is encrypted before being transported on the network. HTTPS sends messages through a cryptographic protocol called TLS for encryption. TLS uses certificates to communicate with remote servers and exchange security keys before data encryption happens.
+
+- What is Session Hijacking?
+
+When an attacker gets a hold of the session id they can now access the web application as you. 
+
+- How can you guard against Session Hijacking?
+  - Same-orgin policy: permits unrestricted interaction between resources originating from the same origin, but restricts certain interactions between resources originating from different origins. Orgin refers to the combination of the URL's scheme, hostname, and port. Cross-origin requests are typically restricted where resources are being accessed programmically using APIs or fetch. Same-orgin policy doesn't restrict all cross-origin requests. Linking, redirects, or form submissions to different origins are typically allowed. Same-origin policy can be an issue for web developers who have a legitimate need for making cross-origin requests. Cross-origin resource sharing or CORS was developed to deal with this issue. This works by adding new HTTP headers, which allows servers to serve resources cross-origin to certain specified origins. https://launchschool.com/books/http/read/security#securehttp
+  - Resetting Sessions: A successful login renders an old session id invalid and creates a new one. If an attacker hijacks a session id, the victim will will be required to authenticate on the next request. With the new session id the attacker will not have access anymore.
+  - Expiration time on sessions: A session that does not expire gives an attacker an unlimited amount of time to pretend to be the real user. Having a session expire after, say 30 minutes, gives the attacker a far narrower window to access the application.
+  - HTTPS: see above.
+- What is Cross-Site Scripting (XSS) ?
+
+When you allow users to input HTML or JavaScript that ends up being displayed on the site directly. (For example a form that allows you to add comments which will be displayed on the site.). If the server side code doesn't do any sanitization of input, the user input will be injected into the page contents, and the browser will *interprest the HTML and JavaScript and execute it.* Attackers can craft malicious HTML and JavaScript and be very destructive to both the server as well as future visitors of the page. For example, an attacker can use JavaScript to grab the session id of every future visitor of the site and then come back and assume their identity. The malicious code would bypass the same-origin policy because the code lives on the site. 
+
+- How can you guard against Cross-Site Scripting?
+  - Always sanitize user input. Eliminate problematic input, such as \<script> tags, or disallowing HTML and JavaScript input altogether in favor of a safer format, like Markdown.
+  - Escape all user input data when displaying it. If you do need to allow users to input HTML and JavaScript, then when you print it out, make sure to escape it so that the browser does not interpret it as code.
+
+  https://launchschool.com/books/http/read/security#securehttp
+
 ####Be aware of the different services that TLS can provide, and have a broad understanding of each of those services
+
+- What are the different services that Transport Layer Security (TLS) provides?
+
+  - **Encryption**: A process of encoding a message so that it can only be read by those with an authorized means of decoding the message.
+
+  To securily send messages via HTTP we want both the request and the response to be encrypted in such a way that they can only be decrypted by the intended recipient. The most efficient way to do this is via symmetric key cryptography. If we want to use symmetric keys however, we also need a way to securly change the symmetric key.
+
+  TLS uses a combination of symmetric and asymmetric cryptography. The inital symmetric key exchange is conducted using asymmetric key encryption, and then the bulk of the message exchange is conducted via symmetric key encryption. The TLS Handshake process is used to:
+
+  		 - Agree which version of TLS to be used in establishing a secure connection.
+  		 - Agree on the various algorithms that will be included in the cipher suite.
+  		 - Enable the exchange of symmetric keys that will be used for message encryption.
+
+  https://launchschool.com/lessons/74f1325b/assignments/54f6defc
+
+  - **Authentication**: A process to verify the identity of a particular party in the message exchange.
+    - In the TLS handshake the server provides its certificate which contains the Public Key. Another function of the certificate is to provide a means of identification for the party providing it. The server can send its certficate along with its public key. Then it can create a 'signature' with some data encryped with the server's private key. The server then sends the signiture to the client along with the original data from which the signature was created. When the client decrypts the signature, if it matches the original data then it shows that only the party in possession of the private key could have encrypted the signiture.
+    - How do we know if a certificate is genuine or not?
+      - Certificate Authorities. They verfy that the party requesting the certificat is who they say they are. And they also digitally sign the certificate being issued. There is a chain of trust of Certificat Authorities up to Root Certificate Authorities. Ultimatley this system still relies on trust. 
+  - **Integrity**: A process to detect whether a message has been interfered with or faked. There is a Message Authentication Code (MAC) field in a TLS PDU. It is similar in concept to checksum fields. Other checksums are about error detection (i.e. to test if some data was corrupted during transport). The intention of the MAC field in a TLS record is to add a layer of security by providing a means of checking that the message hasn't been altered in transit.
+    - Message Authentication Codes are implemented through a hashing algorithm. The sender will create a small amount of data derived from the actual data. This is called a digest. The digest is created using a specific hashing algorithm combined with a pre-agreed hash value. The sender encrypts the data payload using the symmetric key, encapsulates it into a TLS record, and passes the record to the Transport layer to be sent. Upon receipt of the message, the receiverdecrypts the data payload using the symmetric key. The receiver then also creates a digest of the payload using the same algorithm and hash value. If the two digests match, this confirms the integrity of the message.
