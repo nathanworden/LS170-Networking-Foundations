@@ -193,7 +193,7 @@ https://launchschool.com/lessons/cc97deb5/assignments/586769d9
 
 ## TCP & UDP
 
-####Have a clear understanding of the TCP and UDP protocols, their similarities and differences
+####Have a clear understanding of the TCP and UDP protocols, their similarities and differences.
 
 - What is TCP?
 
